@@ -1,0 +1,55 @@
+# Open this file in Visual Studio (or VS Code + REST Client) and click "Send request".
+@host = http://localhost:5109
+
+### List carriers
+GET {{host}}/api/carriers
+
+### Search shipments (all filters are optional)
+GET {{host}}/api/shipments?status=InTransit&page=1&pageSize=10
+
+### Create a shipment
+POST {{host}}/api/shipments
+Content-Type: application/json
+
+{
+  "origin": "Madrid",
+  "destination": "Valencia",
+  "weightKg": 540.25,
+  "carrierId": 1,
+  "estimatedDeliveryUtc": "2030-01-15T10:00:00Z"
+}
+
+### Get shipment by id
+GET {{host}}/api/shipments/1
+
+### Track by tracking number (copy one from the previous responses)
+GET {{host}}/api/shipments/tracking/TMS000000XXXXXX
+
+### Move to InTransit
+PATCH {{host}}/api/shipments/1/status
+Content-Type: application/json
+
+{
+  "status": "InTransit",
+  "note": "Picked up at Madrid hub"
+}
+
+### Invalid transition -> 422 (shipment 3 is Delivered, a final state)
+PATCH {{host}}/api/shipments/3/status
+Content-Type: application/json
+
+{
+  "status": "InTransit"
+}
+
+### Inactive carrier -> 422
+POST {{host}}/api/shipments
+Content-Type: application/json
+
+{
+  "origin": "Bilbao",
+  "destination": "Oviedo",
+  "weightKg": 100,
+  "carrierId": 3,
+  "estimatedDeliveryUtc": "2030-01-15T10:00:00Z"
+}
