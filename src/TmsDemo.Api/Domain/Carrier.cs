@@ -24,4 +24,7 @@ public sealed class Carrier
     public bool IsActive { get; private set; }
 
     public void Deactivate() => IsActive = false;
+
+    /// <summary>Lets the carrier take new shipments again (e.g. after renewing its contract).</summary>
+    public void Activate() => IsActive = true;
 }

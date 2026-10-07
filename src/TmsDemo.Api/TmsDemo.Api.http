@@ -53,3 +53,6 @@ Content-Type: application/json
   "carrierId": 3,
   "estimatedDeliveryUtc": "2030-01-15T10:00:00Z"
 }
+
+### Reactivate carrier 3 (then the request above returns 201)
+POST {{host}}/api/carriers/3/activate

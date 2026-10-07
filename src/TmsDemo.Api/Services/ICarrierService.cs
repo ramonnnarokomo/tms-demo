@@ -8,4 +8,5 @@ public interface ICarrierService
     Task<CarrierResponse> GetByIdAsync(int id, CancellationToken ct);
     Task<CarrierResponse> CreateAsync(CreateCarrierRequest request, CancellationToken ct);
     Task<CarrierResponse> DeactivateAsync(int id, CancellationToken ct);
+    Task<CarrierResponse> ActivateAsync(int id, CancellationToken ct);
 }

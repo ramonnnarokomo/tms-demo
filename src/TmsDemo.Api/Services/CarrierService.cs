@@ -44,6 +44,16 @@ public sealed class CarrierService(TmsDbContext db) : ICarrierService
         return carrier.ToResponse();
     }
 
+    public async Task<CarrierResponse> ActivateAsync(int id, CancellationToken ct)
+    {
+        var carrier = await FindAsync(id, ct);
+
+        carrier.Activate();
+        await db.SaveChangesAsync(ct);
+
+        return carrier.ToResponse();
+    }
+
     private async Task<Carrier> FindAsync(int id, CancellationToken ct) =>
         await db.Carriers.FirstOrDefaultAsync(c => c.Id == id, ct)
         ?? throw new NotFoundException($"Carrier {id} was not found.");

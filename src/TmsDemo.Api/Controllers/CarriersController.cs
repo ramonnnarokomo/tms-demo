@@ -33,4 +33,10 @@ public sealed class CarriersController(ICarrierService carriers) : ControllerBas
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CarrierResponse>> Deactivate(int id, CancellationToken ct) =>
         Ok(await carriers.DeactivateAsync(id, ct));
+
+    /// <summary>Reactivate a carrier so it can take new shipments again.</summary>
+    [HttpPost("{id:int}/activate")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CarrierResponse>> Activate(int id, CancellationToken ct) =>
+        Ok(await carriers.ActivateAsync(id, ct));
 }

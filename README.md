@@ -34,6 +34,7 @@ dotnet test
 | `GET` | `/api/carriers/{id}` | Detalle de un transportista |
 | `POST` | `/api/carriers` | Alta de transportista |
 | `POST` | `/api/carriers/{id}/deactivate` | Desactiva un transportista (no admite envíos nuevos) |
+| `POST` | `/api/carriers/{id}/activate` | Lo vuelve a activar |
 | `GET` | `/api/shipments?status=&carrierId=&destination=&page=&pageSize=` | Búsqueda con filtros y paginación |
 | `GET` | `/api/shipments/{id}` | Detalle con transportista e historial |
 | `GET` | `/api/shipments/tracking/{trackingNumber}` | Seguimiento por número de tracking |
