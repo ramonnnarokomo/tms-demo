@@ -30,6 +30,16 @@ public sealed record ChangeShipmentStatusRequest
     public string? Note { get; init; }
 }
 
+public sealed record RescheduleDeliveryRequest
+{
+    [Required]
+    public DateTime? EstimatedDeliveryUtc { get; init; }
+
+    /// <summary>Optional reason, stored in the tracking history.</summary>
+    [StringLength(400)]
+    public string? Reason { get; init; }
+}
+
 /// <summary>Filters and paging for GET /api/shipments.</summary>
 public sealed record ShipmentQuery
 {

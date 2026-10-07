@@ -45,6 +45,14 @@ public sealed class ShipmentsController(IShipmentService shipments) : Controller
     public async Task<ActionResult<ShipmentDetails>> ChangeStatus(int id, ChangeShipmentStatusRequest request, CancellationToken ct) =>
         Ok(await shipments.ChangeStatusAsync(id, request, ct));
 
+    /// <summary>Change the estimated delivery date (not allowed for Delivered or Cancelled shipments).</summary>
+    [HttpPatch("{id:int}/eta")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult<ShipmentDetails>> RescheduleDelivery(int id, RescheduleDeliveryRequest request, CancellationToken ct) =>
+        Ok(await shipments.RescheduleDeliveryAsync(id, request, ct));
+
     /// <summary>Delete a shipment. Only allowed while it is still Pending.</summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

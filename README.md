@@ -40,6 +40,7 @@ dotnet test
 | `GET` | `/api/shipments/tracking/{trackingNumber}` | Seguimiento por número de tracking |
 | `POST` | `/api/shipments` | Alta de envío (empieza en `Pending`) |
 | `PATCH` | `/api/shipments/{id}/status` | Cambio de estado (con nota opcional) |
+| `PATCH` | `/api/shipments/{id}/eta` | Reprograma la fecha estimada de entrega (con motivo opcional) |
 | `DELETE` | `/api/shipments/{id}` | Borrado (solo si sigue en `Pending`) |
 
 Los errores devuelven `ProblemDetails` (RFC 9457): `400` si la petición no es válida, `404` si no existe el recurso y `422` si se incumple una regla de negocio.
@@ -64,6 +65,7 @@ stateDiagram-v2
 - Cada cambio de estado queda registrado en el historial del envío con fecha y nota.
 - Reportar una incidencia (`Incident`) exige una nota explicando qué ha pasado.
 - Al pasar a `Delivered` se guarda la fecha de entrega.
+- La fecha estimada de entrega se puede reprogramar (siempre a futuro) mientras el envío no esté entregado ni cancelado; el cambio queda en el historial con su motivo.
 - No se puede asignar un envío a un transportista inactivo.
 - Origen y destino tienen que ser distintos, el peso debe estar entre 0 y 40.000 kg y la fecha estimada de entrega tiene que ser futura.
 - Solo se pueden borrar envíos en `Pending`; el resto se cancelan.

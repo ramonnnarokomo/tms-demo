@@ -34,6 +34,15 @@ Content-Type: application/json
   "note": "Picked up at Madrid hub"
 }
 
+### Reschedule the estimated delivery (delay reported by the carrier)
+PATCH {{host}}/api/shipments/1/eta
+Content-Type: application/json
+
+{
+  "estimatedDeliveryUtc": "2030-01-17T10:00:00Z",
+  "reason": "Port strike in Valencia"
+}
+
 ### Invalid transition -> 422 (shipment 3 is Delivered, a final state)
 PATCH {{host}}/api/shipments/3/status
 Content-Type: application/json

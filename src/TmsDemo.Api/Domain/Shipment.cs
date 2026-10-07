@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace TmsDemo.Api.Domain;
 
 /// <summary>
@@ -107,6 +109,31 @@ public sealed class Shipment
             DeliveredAtUtc = nowUtc;
 
         _events.Add(new ShipmentEvent(newStatus, nowUtc, string.IsNullOrWhiteSpace(note) ? null : note.Trim()));
+    }
+
+    /// <summary>
+    /// Moves the estimated delivery (e.g. after a delay reported by the carrier) and leaves
+    /// a trace in the history. Not allowed once the shipment is delivered or cancelled.
+    /// </summary>
+    public void RescheduleDelivery(DateTime newEstimatedDeliveryUtc, DateTime nowUtc, string? reason = null)
+    {
+        if (Status is ShipmentStatus.Delivered or ShipmentStatus.Cancelled)
+            throw new DomainException($"A {Status} shipment can't be rescheduled.");
+
+        if (newEstimatedDeliveryUtc <= nowUtc)
+            throw new DomainException("Estimated delivery must be in the future.");
+
+        if (newEstimatedDeliveryUtc == EstimatedDeliveryUtc)
+            throw new DomainException("The shipment is already scheduled for that date.");
+
+        EstimatedDeliveryUtc = newEstimatedDeliveryUtc;
+
+        var note = "Estimated delivery changed to "
+            + newEstimatedDeliveryUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) + " UTC";
+        if (!string.IsNullOrWhiteSpace(reason))
+            note += $" ({reason.Trim()})";
+
+        _events.Add(new ShipmentEvent(Status, nowUtc, note));
     }
 
     public void EnsureCanBeDeleted()

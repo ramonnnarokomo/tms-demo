@@ -96,6 +96,16 @@ public sealed class ShipmentService(TmsDbContext db, TimeProvider timeProvider) 
         return shipment.ToDetails();
     }
 
+    public async Task<ShipmentDetails> RescheduleDeliveryAsync(int id, RescheduleDeliveryRequest request, CancellationToken ct)
+    {
+        var shipment = await LoadShipmentAsync(id, ct);
+
+        shipment.RescheduleDelivery(request.EstimatedDeliveryUtc!.Value.ToUniversalTime(), UtcNow(), request.Reason);
+        await db.SaveChangesAsync(ct);
+
+        return shipment.ToDetails();
+    }
+
     public async Task DeleteAsync(int id, CancellationToken ct)
     {
         var shipment = await LoadShipmentAsync(id, ct);

@@ -94,6 +94,28 @@ public sealed class ShipmentsApiTests(TmsApiFactory factory) : IClassFixture<Tms
     }
 
     [Fact]
+    public async Task Rescheduling_moves_the_eta_until_the_shipment_is_delivered()
+    {
+        var created = await CreateShipmentAsync();
+        var newEta = created.EstimatedDeliveryUtc.AddDays(2);
+
+        var response = await _client.PatchAsJsonAsync(
+            $"/api/shipments/{created.Id}/eta", new { estimatedDeliveryUtc = newEta, reason = "Port strike" }, Json);
+
+        response.EnsureSuccessStatusCode();
+        var rescheduled = (await response.Content.ReadFromJsonAsync<ShipmentDetails>(Json))!;
+        Assert.Equal(newEta, rescheduled.EstimatedDeliveryUtc);
+        Assert.Contains("Port strike", rescheduled.Events.Last().Note);
+
+        await ChangeStatusAsync(created.Id, ShipmentStatus.InTransit);
+        await ChangeStatusAsync(created.Id, ShipmentStatus.Delivered);
+        var afterDelivery = await _client.PatchAsJsonAsync(
+            $"/api/shipments/{created.Id}/eta", new { estimatedDeliveryUtc = newEta.AddDays(1) }, Json);
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, afterDelivery.StatusCode);
+    }
+
+    [Fact]
     public async Task Only_pending_shipments_can_be_deleted()
     {
         var pending = await CreateShipmentAsync();

@@ -128,6 +128,50 @@ public sealed class ShipmentTests
         Assert.Equal("Signed by receiver", shipment.Events.Last().Note);
     }
 
+    [Theory]
+    [InlineData(ShipmentStatus.Pending)]
+    [InlineData(ShipmentStatus.InTransit)]
+    [InlineData(ShipmentStatus.Incident)]
+    public void Open_shipments_can_be_rescheduled(ShipmentStatus status)
+    {
+        var shipment = ShipmentIn(status);
+        var eventsBefore = shipment.Events.Count;
+        var newEta = new DateTime(2026, 10, 9, 14, 30, 0, DateTimeKind.Utc);
+
+        shipment.RescheduleDelivery(newEta, Now.AddHours(5), "  Port strike in Valencia ");
+
+        Assert.Equal(newEta, shipment.EstimatedDeliveryUtc);
+        Assert.Equal(status, shipment.Status);
+        Assert.Equal(eventsBefore + 1, shipment.Events.Count);
+        var traced = shipment.Events.Last();
+        Assert.Equal(status, traced.Status);
+        Assert.Equal("Estimated delivery changed to 2026-10-09 14:30 UTC (Port strike in Valencia)", traced.Note);
+    }
+
+    [Theory]
+    [InlineData(ShipmentStatus.Delivered)]
+    [InlineData(ShipmentStatus.Cancelled)]
+    public void Finished_shipments_cannot_be_rescheduled(ShipmentStatus status)
+    {
+        var shipment = ShipmentIn(status);
+        var etaBefore = shipment.EstimatedDeliveryUtc;
+
+        var error = Assert.Throws<DomainException>(() => shipment.RescheduleDelivery(Now.AddDays(5), Now.AddHours(5)));
+
+        Assert.Contains("can't be rescheduled", error.Message);
+        Assert.Equal(etaBefore, shipment.EstimatedDeliveryUtc);
+    }
+
+    [Fact]
+    public void Rescheduling_needs_a_new_date_in_the_future()
+    {
+        var shipment = NewShipment();
+
+        Assert.Throws<DomainException>(() => shipment.RescheduleDelivery(Now.AddMinutes(-1), Now));
+        Assert.Throws<DomainException>(() => shipment.RescheduleDelivery(shipment.EstimatedDeliveryUtc, Now));
+        Assert.Single(shipment.Events);
+    }
+
     [Fact]
     public void Only_pending_shipments_can_be_deleted()
     {

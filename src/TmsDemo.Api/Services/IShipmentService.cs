@@ -9,5 +9,6 @@ public interface IShipmentService
     Task<ShipmentDetails> GetByTrackingNumberAsync(string trackingNumber, CancellationToken ct);
     Task<ShipmentDetails> CreateAsync(CreateShipmentRequest request, CancellationToken ct);
     Task<ShipmentDetails> ChangeStatusAsync(int id, ChangeShipmentStatusRequest request, CancellationToken ct);
+    Task<ShipmentDetails> RescheduleDeliveryAsync(int id, RescheduleDeliveryRequest request, CancellationToken ct);
     Task DeleteAsync(int id, CancellationToken ct);
 }
